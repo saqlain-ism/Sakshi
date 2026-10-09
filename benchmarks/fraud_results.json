@@ -1,0 +1,434 @@
+{
+  "summary": {
+    "seeds": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "sellers_per_run": 201,
+    "orders_per_run": 20309,
+    "precision_mean": 1.0,
+    "precision_min": 1.0,
+    "recall_mean": 1.0,
+    "recall_min": 1.0,
+    "f1_mean": 1.0,
+    "flag_rate_by_population": {
+      "sybil": "80/80 (100%)",
+      "ring": "74/74 (100%)",
+      "camouflaged": "50/50 (100%)",
+      "adaptive": "4/40 (10%)",
+      "loyal_local": "0/120 (0%)",
+      "honest": "0/1584 (0%)",
+      "new": "0/77 (0%)"
+    }
+  },
+  "runs": [
+    {
+      "seed": 1,
+      "sellers": 201,
+      "orders": 20309,
+      "tp": 21,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "per_type": {
+        "sybil": {
+          "total": 8,
+          "flagged": 8
+        },
+        "ring": {
+          "total": 8,
+          "flagged": 8
+        },
+        "camouflaged": {
+          "total": 5,
+          "flagged": 5
+        },
+        "adaptive": {
+          "total": 4,
+          "flagged": 1
+        },
+        "loyal_local": {
+          "total": 12,
+          "flagged": 0
+        },
+        "honest": {
+          "total": 159,
+          "flagged": 0
+        },
+        "new": {
+          "total": 5,
+          "flagged": 0
+        }
+      }
+    },
+    {
+      "seed": 2,
+      "sellers": 205,
+      "orders": 19385,
+      "tp": 22,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "per_type": {
+        "sybil": {
+          "total": 8,
+          "flagged": 8
+        },
+        "ring": {
+          "total": 9,
+          "flagged": 9
+        },
+        "camouflaged": {
+          "total": 5,
+          "flagged": 5
+        },
+        "adaptive": {
+          "total": 4,
+          "flagged": 0
+        },
+        "loyal_local": {
+          "total": 12,
+          "flagged": 0
+        },
+        "honest": {
+          "total": 160,
+          "flagged": 0
+        },
+        "new": {
+          "total": 7,
+          "flagged": 0
+        }
+      }
+    },
+    {
+      "seed": 3,
+      "sellers": 204,
+      "orders": 20192,
+      "tp": 21,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "per_type": {
+        "sybil": {
+          "total": 8,
+          "flagged": 8
+        },
+        "ring": {
+          "total": 8,
+          "flagged": 8
+        },
+        "camouflaged": {
+          "total": 5,
+          "flagged": 5
+        },
+        "adaptive": {
+          "total": 4,
+          "flagged": 1
+        },
+        "loyal_local": {
+          "total": 12,
+          "flagged": 0
+        },
+        "honest": {
+          "total": 157,
+          "flagged": 0
+        },
+        "new": {
+          "total": 10,
+          "flagged": 0
+        }
+      }
+    },
+    {
+      "seed": 4,
+      "sellers": 204,
+      "orders": 19147,
+      "tp": 20,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "per_type": {
+        "sybil": {
+          "total": 8,
+          "flagged": 8
+        },
+        "ring": {
+          "total": 7,
+          "flagged": 7
+        },
+        "camouflaged": {
+          "total": 5,
+          "flagged": 5
+        },
+        "adaptive": {
+          "total": 4,
+          "flagged": 1
+        },
+        "loyal_local": {
+          "total": 12,
+          "flagged": 0
+        },
+        "honest": {
+          "total": 157,
+          "flagged": 0
+        },
+        "new": {
+          "total": 11,
+          "flagged": 0
+        }
+      }
+    },
+    {
+      "seed": 5,
+      "sellers": 205,
+      "orders": 19481,
+      "tp": 19,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "per_type": {
+        "sybil": {
+          "total": 8,
+          "flagged": 8
+        },
+        "ring": {
+          "total": 6,
+          "flagged": 6
+        },
+        "camouflaged": {
+          "total": 5,
+          "flagged": 5
+        },
+        "adaptive": {
+          "total": 4,
+          "flagged": 0
+        },
+        "loyal_local": {
+          "total": 12,
+          "flagged": 0
+        },
+        "honest": {
+          "total": 160,
+          "flagged": 0
+        },
+        "new": {
+          "total": 10,
+          "flagged": 0
+        }
+      }
+    },
+    {
+      "seed": 6,
+      "sellers": 204,
+      "orders": 19542,
+      "tp": 19,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "per_type": {
+        "sybil": {
+          "total": 8,
+          "flagged": 8
+        },
+        "ring": {
+          "total": 6,
+          "flagged": 6
+        },
+        "camouflaged": {
+          "total": 5,
+          "flagged": 5
+        },
+        "adaptive": {
+          "total": 4,
+          "flagged": 0
+        },
+        "loyal_local": {
+          "total": 12,
+          "flagged": 0
+        },
+        "honest": {
+          "total": 158,
+          "flagged": 0
+        },
+        "new": {
+          "total": 11,
+          "flagged": 0
+        }
+      }
+    },
+    {
+      "seed": 7,
+      "sellers": 198,
+      "orders": 19823,
+      "tp": 20,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "per_type": {
+        "sybil": {
+          "total": 8,
+          "flagged": 8
+        },
+        "ring": {
+          "total": 7,
+          "flagged": 7
+        },
+        "camouflaged": {
+          "total": 5,
+          "flagged": 5
+        },
+        "adaptive": {
+          "total": 4,
+          "flagged": 0
+        },
+        "loyal_local": {
+          "total": 12,
+          "flagged": 0
+        },
+        "honest": {
+          "total": 158,
+          "flagged": 0
+        },
+        "new": {
+          "total": 4,
+          "flagged": 0
+        }
+      }
+    },
+    {
+      "seed": 8,
+      "sellers": 202,
+      "orders": 19718,
+      "tp": 21,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "per_type": {
+        "sybil": {
+          "total": 8,
+          "flagged": 8
+        },
+        "ring": {
+          "total": 8,
+          "flagged": 8
+        },
+        "camouflaged": {
+          "total": 5,
+          "flagged": 5
+        },
+        "adaptive": {
+          "total": 4,
+          "flagged": 0
+        },
+        "loyal_local": {
+          "total": 12,
+          "flagged": 0
+        },
+        "honest": {
+          "total": 158,
+          "flagged": 0
+        },
+        "new": {
+          "total": 7,
+          "flagged": 0
+        }
+      }
+    },
+    {
+      "seed": 9,
+      "sellers": 202,
+      "orders": 19704,
+      "tp": 21,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "per_type": {
+        "sybil": {
+          "total": 8,
+          "flagged": 8
+        },
+        "ring": {
+          "total": 8,
+          "flagged": 8
+        },
+        "camouflaged": {
+          "total": 5,
+          "flagged": 5
+        },
+        "adaptive": {
+          "total": 4,
+          "flagged": 0
+        },
+        "loyal_local": {
+          "total": 12,
+          "flagged": 0
+        },
+        "honest": {
+          "total": 158,
+          "flagged": 0
+        },
+        "new": {
+          "total": 7,
+          "flagged": 0
+        }
+      }
+    },
+    {
+      "seed": 10,
+      "sellers": 200,
+      "orders": 19686,
+      "tp": 20,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "per_type": {
+        "sybil": {
+          "total": 8,
+          "flagged": 8
+        },
+        "ring": {
+          "total": 7,
+          "flagged": 7
+        },
+        "camouflaged": {
+          "total": 5,
+          "flagged": 5
+        },
+        "adaptive": {
+          "total": 4,
+          "flagged": 1
+        },
+        "loyal_local": {
+          "total": 12,
+          "flagged": 0
+        },
+        "honest": {
+          "total": 159,
+          "flagged": 0
+        },
+        "new": {
+          "total": 5,
+          "flagged": 0
+        }
+      }
+    }
+  ]
+}
