@@ -1,0 +1,538 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sakshi: a live trust network</title>
+<meta name="description" content="A live ONDC-style commerce network where every promise is signed by both sides and sealed in a tamper-evident log.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hind:wght@400;500;600&family=JetBrains+Mono:wght@400&family=Martel:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #EEF1EC;
+  --paper-2: #E3E8E1;
+  --rule: #C9D1C7;
+  --ink: #1E2766;
+  --ink-soft: #4A5280;
+  --text: #22263A;
+  --muted: #5D6377;
+  --seal: #B8321E;
+  --seal-wash: #F4DDD6;
+  --turmeric: #A8760A;
+  --turmeric-wash: #F5E9C8;
+  --leaf: #2E7A4C;
+  --leaf-wash: #D9EBDD;
+  --focus: #3346C9;
+  --serif: "Martel", Georgia, serif;
+  --sans: "Hind", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #11152A; --paper-2: #181D38; --rule: #2B3256; --ink: #C9CFF5; --ink-soft: #A2A9D6;
+    --text: #E4E6F0; --muted: #9AA0BC; --seal: #F07A62; --seal-wash: #3A1C1F; --turmeric: #E6B84A;
+    --turmeric-wash: #352B14; --leaf: #6CC48E; --leaf-wash: #16301F; --focus: #8FA0FF;
+  }
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--paper); color: var(--text);
+  font: 400 17px/1.55 var(--sans);
+}
+a { color: var(--ink); }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.wrap { max-width: 1240px; margin: 0 auto; padding: 0 24px; }
+h1, h2, h3 { font-family: var(--serif); color: var(--ink); margin: 0; line-height: 1.2; }
+h2 { font-size: 1.6rem; font-weight: 800; }
+h3 { font-size: 1.1rem; font-weight: 700; }
+p { margin: 0; }
+.muted { color: var(--muted); }
+.mono { font-family: var(--mono); font-size: .82em; word-break: break-all; }
+button {
+  font: 600 .95rem var(--sans); color: var(--paper); background: var(--ink); border: 0;
+  border-radius: 6px; padding: .5em 1em; cursor: pointer;
+}
+button.quiet { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--ink); }
+button:disabled { opacity: .55; cursor: progress; }
+input[type=text] {
+  font: inherit; color: var(--text); background: var(--paper); border: 1.5px solid var(--rule);
+  border-radius: 6px; padding: .45em .7em; min-width: 0;
+}
+
+/* ---------------------------------------------------------------- header */
+header.top { padding: 40px 0 28px; border-bottom: 1px solid var(--rule); }
+.brand { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 18px; }
+.brand h1 { font-size: clamp(2.6rem, 6vw, 4.2rem); font-weight: 800; letter-spacing: -.01em; }
+.brand .latin { font-family: var(--serif); font-size: 1.5rem; color: var(--ink-soft); font-weight: 700; }
+.lede { max-width: 62ch; margin-top: 14px; font-size: 1.12rem; }
+.controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-top: 22px; }
+.pulse { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); }
+.pulse i { width: 9px; height: 9px; border-radius: 50%; background: var(--leaf); display: inline-block; }
+.pulse.paused i { background: var(--turmeric); }
+
+section { padding: 44px 0; border-bottom: 1px solid var(--rule); }
+.section-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 12px; margin-bottom: 20px; }
+.section-head p { max-width: 64ch; color: var(--muted); margin-top: 6px; }
+
+/* ------------------------------------------------------------- seal + feed */
+.witness { display: grid; grid-template-columns: minmax(280px, 380px) minmax(0, 1fr); gap: 48px; align-items: start; }
+.seal-box { text-align: center; }
+#seal { width: 100%; max-width: 330px; height: auto; color: var(--ink); }
+#seal .ring { fill: none; stroke: currentColor; }
+#seal .hash { font: 400 9.6px var(--mono); fill: currentColor; letter-spacing: .6px; }
+#seal .word { font: 800 34px var(--serif); fill: currentColor; }
+#seal .size { font: 600 12px var(--sans); fill: currentColor; }
+#seal .crack { stroke: var(--seal); stroke-width: 3; fill: none; opacity: 0; }
+#seal.broken { color: var(--seal); }
+#seal.broken .crack { opacity: 1; }
+#seal.stamp { animation: stamp .55s ease-out; }
+@keyframes stamp { 0% { transform: scale(1.06); opacity: .55; } 100% { transform: scale(1); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { #seal.stamp { animation: none; } }
+.seal-facts { margin-top: 14px; display: grid; gap: 6px; text-align: left; font-size: .96rem; }
+.seal-facts .alarm { color: var(--seal); font-weight: 600; }
+.seal-facts .ok { color: var(--leaf); font-weight: 600; }
+
+.feed-filters { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.feed-filters button { background: transparent; color: var(--ink-soft); box-shadow: inset 0 0 0 1px var(--rule); padding: .25em .8em; font-weight: 500; }
+.feed-filters button[aria-pressed=true] { background: var(--ink); color: var(--paper); box-shadow: none; }
+#feed { list-style: none; margin: 0; padding: 0; max-height: 470px; overflow-y: auto; border-top: 1px solid var(--rule); }
+#feed li { display: grid; grid-template-columns: 74px 92px 1fr; gap: 10px; padding: 7px 2px; border-bottom: 1px solid var(--rule); font-size: .93rem; }
+#feed time { color: var(--muted); font-variant-numeric: tabular-nums; }
+.sev { font-weight: 600; }
+.sev.blocked, .sev.critical { color: var(--seal); }
+.sev.success { color: var(--leaf); }
+.sev.warning { color: var(--turmeric); }
+.sev.info { color: var(--ink-soft); }
+#feed li.critical { background: var(--seal-wash); }
+
+/* ---------------------------------------------------------------- sellers */
+.ledger { width: 100%; border-collapse: collapse; font-size: .95rem; }
+.ledger th { text-align: left; font: 600 .85rem var(--sans); color: var(--muted); padding: 0 10px 8px 0; border-bottom: 2px solid var(--ink); }
+.ledger td { padding: 11px 10px 11px 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+.ledger td.num { font-variant-numeric: tabular-nums; text-align: right; }
+.ledger th.num { text-align: right; }
+.seller-name { font-weight: 600; color: var(--ink); }
+.score { display: flex; align-items: center; gap: 10px; min-width: 150px; }
+.score b { font: 700 1.05rem var(--serif); color: var(--ink); width: 3ch; text-align: right; }
+.bar { flex: 1; height: 8px; background: var(--paper-2); border-radius: 4px; overflow: hidden; }
+.bar span { display: block; height: 100%; background: var(--leaf); }
+.bar span.mid { background: var(--turmeric); }
+.bar span.low { background: var(--seal); }
+.tag { display: inline-block; font-size: .85rem; font-weight: 600; padding: .05em .55em; border-radius: 4px; }
+.tag.good { background: var(--leaf-wash); color: var(--leaf); }
+.tag.bad { background: var(--seal-wash); color: var(--seal); }
+.tag.warn { background: var(--turmeric-wash); color: var(--turmeric); }
+.review { color: var(--seal); font-size: .88rem; margin-top: 4px; max-width: 46ch; }
+.table-scroll { overflow-x: auto; }
+.table-scroll .ledger { min-width: 760px; }
+#orders.ledger { min-width: 560px; }
+.ledger td:first-child { min-width: 170px; }
+
+/* ------------------------------------------------------------- attack lab */
+.lab { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr)); gap: 28px 40px; }
+.lab h3 { margin-bottom: 4px; }
+.lab .group > p { color: var(--muted); font-size: .92rem; margin-bottom: 8px; }
+.attack { border-top: 1px solid var(--rule); padding: 12px 0; }
+.attack-row { display: flex; gap: 14px; justify-content: space-between; align-items: start; }
+.attack-row strong { display: block; color: var(--ink); }
+.attack-row span { color: var(--muted); font-size: .92rem; }
+.attack-row button { flex: none; }
+.result { margin-top: 10px; padding: 12px 14px; border-left: 4px solid var(--leaf); background: var(--leaf-wash); border-radius: 0 6px 6px 0; font-size: .93rem; }
+.result.fail { border-color: var(--seal); background: var(--seal-wash); }
+.result.wait { border-color: var(--turmeric); background: var(--turmeric-wash); }
+.result .verdict { font-weight: 700; color: var(--ink); }
+.result ol { margin: 8px 0 0; padding-left: 1.3em; color: var(--muted); }
+.result .why { margin-top: 8px; }
+
+/* --------------------------------------------------------------- orders */
+.orders-grid { display: grid; grid-template-columns: minmax(260px, 340px) minmax(0, 1fr); gap: 40px; }
+.order-form { display: grid; gap: 10px; align-content: start; }
+.order-form label { font-weight: 600; color: var(--ink); }
+.order-form .row { display: flex; gap: 8px; }
+.order-form .row input { flex: 1; }
+.status { font-weight: 600; font-size: .88rem; }
+.status.ok { color: var(--leaf); }
+.status.bad { color: var(--seal); }
+.status.wait { color: var(--turmeric); }
+.verify-out { margin-top: 8px; font-size: .9rem; }
+.verify-out li { list-style: none; }
+.verify-out ul { padding: 0; margin: 0; display: grid; gap: 3px; }
+
+/* --------------------------------------------------------------- lifecycle */
+.lifecycle { list-style: none; counter-reset: step; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; }
+.lifecycle li { counter-increment: step; }
+.lifecycle li::before { content: counter(step); display: block; font: 800 2rem var(--serif); color: var(--ink-soft); line-height: 1; margin-bottom: 6px; }
+.lifecycle strong { color: var(--ink); display: block; margin-bottom: 2px; }
+.lifecycle p { color: var(--muted); font-size: .94rem; }
+
+footer { padding: 32px 0 56px; color: var(--muted); font-size: .92rem; }
+
+@media (max-width: 900px) {
+  .witness, .orders-grid { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+  #feed li { grid-template-columns: 64px 1fr; row-gap: 2px; }
+  #feed li > span:last-child { grid-column: 1 / -1; }
+  #feed li .who { display: none; }
+}
+@media (max-width: 520px) {
+  .wrap { padding: 0 16px; }
+  body { font-size: 16px; }
+  .attack-row { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="brand"><h1 lang="hi">साक्षी</h1><span class="latin">Sakshi, the witness</span></div>
+    <p class="lede">A live, ONDC-style shopping network. Buyer and seller apps sign every promise they make to each
+      other, and a witness seals each one into a public log that nobody can quietly rewrite, not even the
+      witness itself. Watch it run, then try to break it.</p>
+    <div class="controls">
+      <span class="pulse" id="pulse"><i></i><span id="pulse-text">Connecting to the network</span></span>
+      <button class="quiet" id="sim-toggle" type="button">Pause simulation</button>
+      <a href="/docs">API reference</a>
+    </div>
+  </div>
+</header>
+
+<main>
+<section aria-labelledby="witness-h">
+  <div class="wrap witness">
+    <div class="seal-box">
+      <h2 id="witness-h" class="visually-hidden" style="position:absolute;left:-9999px">The witness log</h2>
+      <svg id="seal" viewBox="0 0 240 240" role="img" aria-labelledby="seal-title">
+        <title id="seal-title">Seal of the log: its current root hash</title>
+        <defs><path id="hash-path" d="M120,120 m-94,0 a94,94 0 1,1 188,0 a94,94 0 1,1 -188,0"/></defs>
+        <circle class="ring" cx="120" cy="120" r="114" stroke-width="2.5"/>
+        <circle class="ring" cx="120" cy="120" r="108" stroke-width="1"/>
+        <text class="hash"><textPath href="#hash-path" id="seal-hash">waiting for the first entry</textPath></text>
+        <circle class="ring" cx="120" cy="120" r="76" stroke-width="1.5"/>
+        <text class="word" x="120" y="124" text-anchor="middle" lang="hi">साक्षी</text>
+        <text class="size" x="120" y="150" text-anchor="middle" id="seal-size">0 entries</text>
+        <path class="crack" d="M62,40 L98,96 L84,118 L132,150 L118,176 L170,214"/>
+      </svg>
+      <div class="seal-facts">
+        <p>The ring is the log's current <strong>root hash</strong>. It changes with every entry, and it
+          changes completely if any old entry is edited.</p>
+        <p id="audit-line" class="muted">Auditor starting</p>
+        <p class="muted" id="log-line"></p>
+      </div>
+    </div>
+    <div>
+      <div class="section-head" style="margin-bottom:12px">
+        <div><h2>What's happening</h2><p>Every request between apps is signature-checked. Rejections show up here.</p></div>
+      </div>
+      <div class="feed-filters" role="group" aria-label="Filter events">
+        <button type="button" data-filter="all" aria-pressed="true">Everything</button>
+        <button type="button" data-filter="blocked" aria-pressed="false">Blocked</button>
+        <button type="button" data-filter="ledger" aria-pressed="false">Log entries</button>
+        <button type="button" data-filter="dispute" aria-pressed="false">Disputes</button>
+        <button type="button" data-filter="attack" aria-pressed="false">Attacks</button>
+      </div>
+      <ul id="feed" aria-live="polite"></ul>
+    </div>
+  </div>
+</section>
+
+<section aria-labelledby="sellers-h">
+  <div class="wrap">
+    <div class="section-head">
+      <div><h2 id="sellers-h">Sellers, by evidence</h2>
+        <p>Scores are calculated only from receipts both sides signed, so anyone can recompute them from the
+          log. Buyers are steered towards high scores, and away from sellers under review.</p></div>
+      <p class="muted" id="rep-basis"></p>
+    </div>
+    <div class="table-scroll">
+      <table class="ledger" id="sellers">
+        <thead><tr><th>Seller</th><th>Reputation</th><th class="num">On time</th><th class="num">Late</th>
+          <th class="num">Cancelled</th><th class="num">Not delivered</th><th class="num">Disputes lost</th>
+          <th>GST credential</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section aria-labelledby="lab-h">
+  <div class="wrap">
+    <div class="section-head">
+      <div><h2 id="lab-h">Attack the network</h2>
+        <p>Each button sends a real attack at the running services. Nothing is staged: the result is whatever
+          the defending code actually did.</p></div>
+      <button type="button" id="run-all">Run every attack</button>
+    </div>
+    <div class="lab" id="lab"></div>
+  </div>
+</section>
+
+<section aria-labelledby="orders-h">
+  <div class="wrap orders-grid">
+    <div class="order-form">
+      <h2 id="orders-h">Place an order</h2>
+      <p class="muted">Your order goes through the full signed flow: search, quote, confirm, countersign, log.</p>
+      <label for="q">What do you need?</label>
+      <div class="row"><input type="text" id="q" value="rice" autocomplete="off"><button type="button" id="order-btn">Order</button></div>
+      <p id="order-msg" class="muted" aria-live="polite"></p>
+    </div>
+    <div>
+      <h3 style="margin-bottom:8px">Recent orders</h3>
+      <p class="muted" style="margin-bottom:10px">Use "Verify" to check an order yourself: every signature, and its place in the sealed log.</p>
+      <div class="table-scroll">
+        <table class="ledger" id="orders"><thead><tr><th>Order</th><th>Seller</th><th class="num">Price</th><th>Status</th><th></th></tr></thead><tbody></tbody></table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section aria-labelledby="life-h">
+  <div class="wrap">
+    <div class="section-head"><div><h2 id="life-h">How an order becomes evidence</h2></div></div>
+    <ol class="lifecycle">
+      <li><strong>Quote</strong><p>The seller app signs the price. A signed quote is binding on the seller.</p></li>
+      <li><strong>Contract</strong><p>On confirmation the seller signs the terms. The buyer app checks they match the quote, then countersigns.</p></li>
+      <li><strong>Sealed</strong><p>The witness checks both signatures and appends the contract to the Merkle log, returning a proof.</p></li>
+      <li><strong>Delivery</strong><p>The seller signs "delivered at", the buyer confirms, and that receipt is sealed too.</p></li>
+      <li><strong>Settled</strong><p>Broken promises are decided from the sealed evidence, and every verdict is logged as well.</p></li>
+    </ol>
+  </div>
+</section>
+
+<section aria-labelledby="net-h">
+  <div class="wrap">
+    <div class="section-head"><div><h2 id="net-h">Who is on the network</h2>
+      <p>Every participant joined by proving it holds its keys and answering an encrypted challenge from the registry.</p></div></div>
+    <div class="table-scroll"><table class="ledger" id="participants"><thead><tr><th>Participant</th><th>Role</th><th>Key</th><th>Status</th><th>Public signing key</th></tr></thead><tbody></tbody></table></div>
+  </div>
+</section>
+</main>
+
+<footer><div class="wrap">Sakshi is a research prototype running on simulated participants. Names and businesses are fictional.</div></footer>
+
+<script>
+const API = "/console/api";
+const ROLE = { BAP: "Buyer app", BPP: "Seller app", BG: "Gateway", REGISTRY: "Registry", LEDGER: "Witness", ISSUER: "GST authority" };
+const SEV = { blocked: "blocked", critical: "alarm", success: "ok", warning: "warning", info: "info" };
+const STATUS = {
+  CONFIRMED: ["Confirmed", "wait"], DELIVERED: ["Delivered on time", "ok"], DELIVERED_LATE: ["Delivered late", "wait"],
+  OVERDUE: ["Not delivered", "bad"], CANCELLED_BY_SELLER: ["Cancelled by seller", "bad"],
+  REFUSED_PRICE_CHANGED: ["Refused: price changed", "bad"], CONFIRMING: ["Confirming", "wait"],
+};
+let lastEvent = 0, filter = "all", lastRoot = null, simRunning = true;
+const events = [];
+
+function el(tag, attrs = {}, ...kids) {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === "class") n.className = v; else if (k.startsWith("on")) n.addEventListener(k.slice(2), v);
+    else if (v !== null && v !== undefined && v !== false) n.setAttribute(k, v);
+  }
+  for (const k of kids.flat()) if (k !== null && k !== undefined && k !== false) n.append(k.nodeType ? k : String(k));
+  return n;
+}
+const hhmmss = ts => new Date(ts * 1000).toLocaleTimeString([], { hour12: false });
+function b64hex(b64) {
+  try { return Array.from(atob(b64), c => c.charCodeAt(0).toString(16).padStart(2, "0")).join(""); }
+  catch { return b64; }
+}
+async function getJSON(url, opts) { const r = await fetch(url, opts); return r.json(); }
+
+/* ------------------------------------------------------------------ feed */
+function eventMatches(e) {
+  if (filter === "all") return true;
+  if (filter === "blocked") return e.severity === "blocked" || e.severity === "critical";
+  return e.kind === filter || (filter === "ledger" && e.kind === "audit");
+}
+function renderFeed() {
+  const ul = document.getElementById("feed");
+  ul.replaceChildren(...events.filter(eventMatches).slice(-120).reverse().map(e =>
+    el("li", { class: e.severity },
+      el("time", {}, hhmmss(e.ts)),
+      el("span", { class: "sev " + e.severity }, SEV[e.severity] || e.severity),
+      el("span", {}, el("span", { class: "who muted" }, e.actor + ": "), e.summary))));
+}
+async function pollEvents() {
+  try {
+    const rows = await getJSON(`${API}/events?after=${lastEvent}`);
+    if (rows.length) {
+      events.push(...rows); lastEvent = rows[rows.length - 1].id;
+      if (events.length > 600) events.splice(0, events.length - 600);
+      renderFeed();
+    }
+  } catch { /* the next poll retries */ }
+}
+document.querySelectorAll(".feed-filters button").forEach(b => b.addEventListener("click", () => {
+  filter = b.dataset.filter;
+  document.querySelectorAll(".feed-filters button").forEach(x => x.setAttribute("aria-pressed", x === b));
+  renderFeed();
+}));
+
+/* ------------------------------------------------------------------ state */
+function renderSeal(st) {
+  const seal = document.getElementById("seal");
+  if (st.sth) {
+    const hex = b64hex(st.sth.root_hash);
+    document.getElementById("seal-hash").textContent = hex.match(/.{1,8}/g).join(" ");
+    document.getElementById("seal-size").textContent = `${st.sth.tree_size} sealed entries`;
+    if (lastRoot && lastRoot !== st.sth.root_hash) { seal.classList.remove("stamp"); void seal.getBBox(); seal.classList.add("stamp"); }
+    lastRoot = st.sth.root_hash;
+    document.getElementById("log-line").textContent =
+      `Signed by witness.sakshi.network at ${hhmmss(st.sth.timestamp)}.`;
+  }
+  const a = st.auditor, line = document.getElementById("audit-line");
+  seal.classList.toggle("broken", Boolean(a.last_error));
+  if (a.last_error) { line.className = "alarm"; line.textContent = `Auditor alarm: ${a.last_error}`; }
+  else {
+    line.className = "ok";
+    line.textContent = `Independent auditor: ${a.checks} checks, history intact` +
+      (a.violations ? ` (${a.violations} tampering attempt${a.violations > 1 ? "s" : ""} caught)` : "");
+  }
+}
+function scoreBar(score) {
+  const cls = score >= 75 ? "" : score >= 45 ? "mid" : "low";
+  return el("div", { class: "score" }, el("b", {}, Math.round(score)),
+    el("div", { class: "bar", "aria-hidden": "true" }, el("span", { class: cls, style: `width:${Math.max(2, score)}%` })));
+}
+function renderSellers(st) {
+  const reps = (st.reputation && st.reputation.sellers) || {};
+  const fraud = {}; ((st.fraud && st.fraud.sellers) || []).forEach(f => fraud[f.seller_id] = f);
+  const known = {}; (st.sellers || []).forEach(s => known[s.seller_id] = s);
+  const ids = [...new Set([...Object.keys(known), ...Object.keys(reps)])];
+  ids.sort((a, b) => ((reps[b] || {}).score ?? -1) - ((reps[a] || {}).score ?? -1));
+  const basis = st.reputation && st.reputation.computed_over;
+  document.getElementById("rep-basis").textContent = basis ? `Computed over the first ${basis.tree_size} log entries` : "";
+  document.querySelector("#sellers tbody").replaceChildren(...ids.map(id => {
+    const r = reps[id], s = known[id] || {}, f = fraud[id];
+    const cred = s.credential === "verified" ? el("span", { class: "tag good" }, "Verified")
+      : s.credential ? el("span", { class: "tag bad", title: s.credential }, s.credential === "CRED_BAD_SIGNATURE" ? "Forged" : "Invalid")
+      : el("span", { class: "muted" }, "not seen yet");
+    const name = el("td", {}, el("div", { class: "seller-name" }, s.name || id),
+      el("div", { class: "muted", style: "font-size:.85rem" }, s.bpp_id || ""),
+      f && f.flagged ? el("div", { class: "review" }, "Under review: " + f.reasons.slice(0, 2).join("; ")) : null,
+      s.credential && s.credential !== "verified" ? el("div", { class: "review" }, "Hidden from buyers: the GST badge isn't signed by the authority") : null);
+    if (!r) return el("tr", {}, name, el("td", { class: "muted" }, "no signed orders"), ...Array(5).fill(0).map(() => el("td", { class: "num muted" }, "–")), el("td", {}, cred));
+    return el("tr", {}, name,
+      el("td", {}, scoreBar(r.score), el("div", { class: "muted", style: "font-size:.82rem" }, r.confidence === "new" ? "too little evidence yet" : `${r.orders} orders, ${r.confidence} confidence`)),
+      el("td", { class: "num" }, r.on_time), el("td", { class: "num" }, r.late), el("td", { class: "num" }, r.seller_cancellations),
+      el("td", { class: "num" }, r.undelivered_overdue), el("td", { class: "num" }, r.disputes_lost), el("td", {}, cred));
+  }));
+}
+function renderOrders(st) {
+  document.querySelector("#orders tbody").replaceChildren(...st.orders.slice(0, 14).map(o => {
+    const [label, cls] = STATUS[o.status] || [o.status, "wait"];
+    const out = el("div", { class: "verify-out" });
+    const btn = el("button", { type: "button", class: "quiet", onclick: async () => {
+      btn.disabled = true; out.textContent = "Checking signatures and proofs";
+      try {
+        const v = await getJSON(`${API}/verify/${encodeURIComponent(o.order_id)}`);
+        out.replaceChildren(el("ul", {}, v.steps.map(s => el("li", { class: s.ok ? "status ok" : "status bad" },
+          (s.ok ? "✓ " : "✗ ") + s.check, s.detail ? el("span", { class: "muted", style: "font-weight:400" }, ": " + s.detail) : null))));
+      } catch { out.textContent = "Couldn't reach the ledger. Try again."; }
+      btn.disabled = false;
+    } }, "Verify");
+    const verifiable = o.ledger && Object.keys(o.ledger).length;
+    return el("tr", {},
+      el("td", {}, el("div", { class: "mono" }, o.order_id), el("div", { class: "muted", style: "font-size:.85rem" }, o.buyer), out),
+      el("td", {}, o.seller_name), el("td", { class: "num" }, "₹" + o.price),
+      el("td", {}, el("span", { class: "status " + cls }, label)),
+      el("td", {}, verifiable ? btn : null));
+  }));
+}
+function renderParticipants(st) {
+  document.querySelector("#participants tbody").replaceChildren(...st.participants.map(p =>
+    el("tr", {}, el("td", { class: "seller-name" }, p.subscriber_id), el("td", {}, ROLE[p.type] || p.type),
+      el("td", {}, p.ukId),
+      el("td", {}, el("span", { class: "tag " + (p.status === "SUBSCRIBED" ? "good" : p.status === "REVOKED" ? "bad" : "warn") },
+        p.status === "SUBSCRIBED" ? "Active" : p.status === "REVOKED" ? "Revoked" : p.status)),
+      el("td", { class: "mono muted" }, p.signing_public_key.slice(0, 22) + "…"))));
+}
+async function pollState() {
+  try {
+    const st = await getJSON(`${API}/state`);
+    renderSeal(st); renderSellers(st); renderOrders(st); renderParticipants(st);
+    simRunning = st.sim.running;
+    const pulse = document.getElementById("pulse");
+    pulse.classList.toggle("paused", !st.sim.active);
+    document.getElementById("pulse-text").textContent = st.sim.active
+      ? `Simulation running: ${st.sim.placed} orders placed by simulated buyers` : "Simulation paused";
+    document.getElementById("sim-toggle").textContent = simRunning ? "Pause simulation" : "Resume simulation";
+  } catch {
+    document.getElementById("pulse-text").textContent = "Can't reach the network. Retrying";
+  }
+}
+document.getElementById("sim-toggle").addEventListener("click", async () => {
+  await getJSON(`${API}/sim`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ running: !simRunning }) });
+  pollState();
+});
+
+/* ------------------------------------------------------------- attack lab */
+const OUTCOME = {
+  BLOCKED: ["Blocked", ""], DETECTED: ["Detected", ""], DISPROVEN: ["Denial disproven", ""],
+  NOT_BLOCKED: ["Not blocked", "fail"], ERROR: ["Couldn't run", "wait"], PENDING: ["Not caught yet", "wait"],
+};
+async function runAttack(a, btn, slot) {
+  btn.disabled = true; btn.textContent = "Running";
+  slot.replaceChildren(el("div", { class: "result wait" }, "Attacking the live network"));
+  try {
+    const r = await getJSON(`${API}/attacks/${a.name}`, { method: "POST" });
+    const [word, cls] = OUTCOME[r.outcome] || [r.outcome, "wait"];
+    slot.replaceChildren(el("div", { class: "result " + cls },
+      el("p", {}, el("span", { class: "verdict" }, word + ". "), r.summary),
+      r.why_it_matters ? el("p", { class: "why" }, el("strong", {}, "Why it matters: "), r.why_it_matters) : null,
+      r.steps && r.steps.length ? el("ol", {}, r.steps.map(s => el("li", {}, s))) : null));
+  } catch { slot.replaceChildren(el("div", { class: "result fail" }, "The attack request failed to reach the console.")); }
+  btn.disabled = false; btn.textContent = "Run again";
+}
+const GROUP_NOTES = {
+  Transport: "Messages travelling between apps.",
+  Identity: "Who is allowed to speak, and as whom.",
+  Commitments: "Promises made during an order.",
+  Ledger: "The log itself, attacked by its own operator.",
+  Reputation: "Gaming the scores.",
+};
+async function buildLab() {
+  const catalog = await getJSON(`${API}/attacks`);
+  const groups = {};
+  catalog.forEach(a => (groups[a.category] = groups[a.category] || []).push(a));
+  const runners = [];
+  document.getElementById("lab").replaceChildren(...Object.entries(groups).map(([cat, list]) =>
+    el("div", { class: "group" }, el("h3", {}, cat), el("p", {}, GROUP_NOTES[cat] || ""),
+      list.map(a => {
+        const slot = el("div");
+        const btn = el("button", { type: "button", class: "quiet", onclick: () => runAttack(a, btn, slot) }, "Run");
+        runners.push(() => runAttack(a, btn, slot));
+        return el("div", { class: "attack" },
+          el("div", { class: "attack-row" }, el("div", {}, el("strong", {}, a.title), el("span", {}, a.threat)), btn), slot);
+      }))));
+  document.getElementById("run-all").addEventListener("click", async e => {
+    e.target.disabled = true;
+    for (const run of runners) await run();
+    e.target.disabled = false;
+  });
+}
+
+/* ----------------------------------------------------------------- orders */
+document.getElementById("order-btn").addEventListener("click", async () => {
+  const btn = document.getElementById("order-btn"), msg = document.getElementById("order-msg");
+  btn.disabled = true; msg.textContent = "Searching all seller apps through the gateway";
+  try {
+    const r = await getJSON(`${API}/order`, { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query: document.getElementById("q").value }) });
+    if (r.order_id) {
+      const [label] = STATUS[r.status] || [r.status];
+      msg.textContent = `${label}: ${r.seller_name}, ₹${r.price}. ` +
+        (r.ledger.ORDER_CONTRACT ? `Contract sealed as entry #${r.ledger.ORDER_CONTRACT.index}.` : "");
+    } else if (r.status === "NO_OFFERS") msg.textContent = "No seller has that. Try rice, milk, dal, eggs or tea.";
+    else msg.textContent = (r.error && r.error.message) || r.status;
+  } catch { msg.textContent = "The order didn't go through. Try again."; }
+  btn.disabled = false; pollState();
+});
+
+buildLab();
+pollState(); pollEvents();
+setInterval(pollState, 2500);
+setInterval(pollEvents, 1500);
+</script>
+</body>
+</html>
