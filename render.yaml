@@ -1,0 +1,17 @@
+# One-click deploy of the live demo to Render's free tier (single process, SAKSHI_ROLE=all).
+# In Render: New + -> Blueprint -> pick this repository.
+services:
+  - type: web
+    name: sakshi-demo
+    runtime: docker
+    plan: free
+    healthCheckPath: /healthz
+    envVars:
+      - key: SAKSHI_ROLE
+        value: all
+      - key: ADMIN_TOKEN
+        generateValue: true
+      - key: NETWORK_SEED
+        generateValue: true
+      - key: SIM_IDLE_PAUSE_S
+        value: "600"

@@ -1,0 +1,17 @@
+{
+  "python": "3.13.16",
+  "machine": "x86_64",
+  "body_bytes": 585,
+  "sign_per_s": 12978,
+  "verify_per_s": 7172,
+  "verify_ms_p50": 0.136,
+  "verify_ms_p99": 0.173,
+  "receipt_verify_per_s": 3377,
+  "log_append_per_s": 1471949,
+  "root_first_s": 1.59,
+  "root_after_append_ms": 0.03,
+  "proof_gen_ms": 0.039,
+  "proof_verify_ms": 0.0173,
+  "proof_hashes_at_1M": 20,
+  "proof_bytes_at_1M": 640
+}

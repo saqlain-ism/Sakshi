@@ -1,0 +1,83 @@
+# Distributed mode: every participant in its own container, talking over the
+# Docker network, with Redis as the shared replay-protection store.
+#
+#   docker compose up --build        then open http://localhost:8000
+#
+# For the single-process version (what the free live demo runs), use:
+#   docker run -p 8000:8000 $(docker build -q .)
+
+name: sakshi
+
+x-sakshi: &sakshi
+  build: .
+  image: sakshi:latest
+  restart: unless-stopped
+  environment: &env
+    NETWORK_SEED: ${NETWORK_SEED:-sakshi-demo-network}
+    ADMIN_TOKEN: ${ADMIN_TOKEN:-demo-admin-token}
+    REDIS_URL: redis://redis:6379/0
+    REGISTRY_HOST: http://registry:8000
+    GATEWAY_HOST: http://gateway:8000
+    LEDGER_HOST: http://ledger:8000
+    ISSUER_HOST: http://issuer:8000
+    BAP_HOST: http://bap:8000
+    BPP_KIRANA_HOST: http://bpp-kirana:8000
+    BPP_BAZAAR_HOST: http://bpp-bazaar:8000
+    BPP_LOCAL_HOST: http://bpp-local:8000
+    CONSOLE_HOST: http://console:8000
+    ATTACKERS_HOST: http://console:8000
+  depends_on:
+    redis: { condition: service_healthy }
+
+services:
+  redis:
+    image: redis:7.4-alpine
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      retries: 10
+
+  registry:
+    <<: *sakshi
+    environment: { <<: *env, SAKSHI_ROLE: registry }
+
+  gateway:
+    <<: *sakshi
+    environment: { <<: *env, SAKSHI_ROLE: gateway }
+
+  ledger:
+    <<: *sakshi
+    environment: { <<: *env, SAKSHI_ROLE: ledger, LEDGER_DB: /data/ledger.db }
+    volumes: ["ledger-data:/data"]
+
+  issuer:
+    <<: *sakshi
+    environment: { <<: *env, SAKSHI_ROLE: issuer }
+
+  bap:
+    <<: *sakshi
+    environment: { <<: *env, SAKSHI_ROLE: bap }
+
+  bpp-kirana:
+    <<: *sakshi
+    environment: { <<: *env, SAKSHI_ROLE: bpp, BPP_NAME: kirana }
+
+  bpp-bazaar:
+    <<: *sakshi
+    environment: { <<: *env, SAKSHI_ROLE: bpp, BPP_NAME: bazaar }
+
+  bpp-local:
+    <<: *sakshi
+    environment: { <<: *env, SAKSHI_ROLE: bpp, BPP_NAME: local }
+
+  console:
+    <<: *sakshi
+    ports: ["8000:8000"]
+    environment:
+      <<: *env
+      SAKSHI_ROLE: console
+      EVENT_SOURCES: http://registry:8000,http://gateway:8000,http://ledger:8000,http://issuer:8000,http://bap:8000,http://bpp-kirana:8000,http://bpp-bazaar:8000,http://bpp-local:8000
+
+volumes:
+  ledger-data:
