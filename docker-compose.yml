@@ -4,7 +4,7 @@
 #   docker compose up --build        then open http://localhost:8000
 #
 # For the single-process version (what the free live demo runs), use:
-#   docker run -p 8000:8000 $(docker build -q .)
+#   docker run -p 8001:8000 $(docker build -q .)
 
 name: sakshi
 
@@ -73,7 +73,7 @@ services:
 
   console:
     <<: *sakshi
-    ports: ["8000:8000"]
+    ports: ["8001:8000"]
     environment:
       <<: *env
       SAKSHI_ROLE: console
