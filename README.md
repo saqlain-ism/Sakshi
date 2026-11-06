@@ -10,7 +10,7 @@ like India's ONDC. Buyer and seller apps sign every promise they make to each ot
 promises into a tamper-evident Merkle log. Disputes are settled from evidence, reputation is recomputable by
 anyone, and fake-review rings are detected from the trade graph.
 
-**Live demo:** _add your deployed link here_. Watch a simulated network trade, then run 17 real attacks
+**Live demo:** [add your deployed link here](https://sakshi-demo.onrender.com). Watch a simulated network trade, then run 17 real attacks
 against it.
 
 ![Sakshi dashboard: the witness seal (the log's live root hash) and the event feed](docs/images/dashboard.png)
